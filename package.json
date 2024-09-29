@@ -20,6 +20,7 @@
     "typescript": "^5.6.2"
   },
   "dependencies": {
-    "aws-amplify": "^6.6.2"
+    "aws-amplify": "^6.6.2",
+    "lena.js": "^0.9.0"
   }
 }

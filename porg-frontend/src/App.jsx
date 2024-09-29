@@ -3,6 +3,7 @@ import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
 import Webcam from 'react-webcam'
+import doPreProcessing from './preProcessing.js'
 
 function App() {
   const [count, setCount] = useState(0)
@@ -13,8 +14,10 @@ function App() {
   const webcamRef = useRef(null);
   const captureIntervalRef = useRef(null);
 
+  // send the image (encoded in base 64) to our processing backend API
   const sendFrame = async (imageSrc) => {
     try {
+      // send the image to the API
       const response = await fetch('/api/process-frame', {
         method: 'POST',
         headers: {
@@ -36,9 +39,16 @@ function App() {
     }
   };
 
+  // gets a screenshot from the webcam then sends it to the backend
   const capture = useCallback(() => {
+    // get image from webcam
     const imageSrc = webcamRef.current.getScreenshot();
-    sendFrame(imageSrc);
+
+    // do preprocessing
+    const processedFrame = doPreProcessing(imageSrc);
+
+    // send preprocessed frame to backend
+    sendFrame(processedFrame);
   }, [webcamRef])
 
     // start capture
@@ -75,6 +85,11 @@ function App() {
             screenshotFormat="image/jpeg"
             style={{ width: '512px', height: 'auto' }}
           />
+        </div>
+        {/* DEBUG: this is to see a preview of the image after preprocessing.
+        This canvas needs to exist for the preprocessing to work, but it can be hidden once we no longer need it for debugging*/}
+        <div>
+          <canvas id="preProcessing_preview" width="256" height="auto"></canvas>
         </div>
         <div>
           <label htmlFor="captureInterval">Capture Interval (seconds): </label>
