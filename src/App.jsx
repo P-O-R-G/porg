@@ -3,7 +3,7 @@ import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
 import Webcam from 'react-webcam'
-import doPreProcessing from './preProcessing.js'
+import doPreProcessing from './preprocessing.js'
 
 function App() {
   const [count, setCount] = useState(0)
