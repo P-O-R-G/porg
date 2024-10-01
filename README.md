@@ -1,12 +1,8 @@
-# PORG: Processing of Real-time Gestures
+# React + Vite
 
-*Monorepo for development on the PORG project*
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
+Currently, two official plugins are available:
 
-PORG is an application that translates American Sign Language (ASL) to written English in real-time, bridging the communication gap between ASL speakers and non-ASL speakers.
-
-## Team
-- Adam Rohrer, *adr114*
-- Clay Preusch, *cdp50*
-- Mariana Davis, *ldm117*
-- Samuel Lovvoll, *sdl74*
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
