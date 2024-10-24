@@ -17,23 +17,31 @@ function App() {
   // send the image (encoded in base 64) to our processing backend API
   const sendFrame = async (imageSrc) => {
     try {
+      console.log(imageSrc);
       // send the image to the API
-      const response = await fetch('/api/process-frame', {
+      var imageStr = imageSrc.replace(/^data:image\/(png|jpeg);base64,/, '');
+
+      const json = fetch('http://0.0.0.0:8080/image_inference', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'text/plain',
         },
-        body: JSON.stringify({ frame: imageSrc }),
+        body: JSON.stringify({ "image": imageStr }),
+      }).then((response) => {
+        if (!response.ok) {
+          console.error('Failed to process frame');
+        } else {
+          setProcessedFrames((prev) => prev + 1);
+          return response.json();
+        }
+      }).then((json) => {
+        console.log(json);
+        var pred_class = json.pred_class;
+        console.log(pred_class);
+        var prob = json.prob;
+        console.log(prob);
+        return json;
       });
-  
-      // screenshot posted successfully
-      if (response.ok) {
-        setProcessedFrames((prev) => prev + 1);
-      } 
-      // screenshot post failed
-      else {
-        console.error('Failed to process frame');
-      }
     } catch (error) {
       console.error('Error sending frame to backend:', error);
     }
@@ -47,8 +55,8 @@ function App() {
     // do preprocessing
     const processedFrame = doPreProcessing(imageSrc);
 
-    // send preprocessed frame to backend
-    sendFrame(processedFrame);
+    // TODO: send preprocessed frame to backend
+    sendFrame(imageSrc);
   }, [webcamRef])
 
     // start capture
