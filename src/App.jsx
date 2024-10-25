@@ -1,24 +1,18 @@
 import { useState, useRef, useCallback, useEffect } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
 import Webcam from 'react-webcam'
 import doPreProcessing from './preprocessing.js'
+import './App.css'
 
 function App() {
-  const [count, setCount] = useState(0)
-
   const [isCapturing, setIsCapturing] = useState(false)
   const [captureInterval, setCaptureInterval] = useState(1);
   const [processedFrames, setProcessedFrames] = useState(0);
+  const [prediction, setPrediction] = useState('');
   const webcamRef = useRef(null);
   const captureIntervalRef = useRef(null);
 
-  // send the image (encoded in base 64) to our processing backend API
   const sendFrame = async (imageSrc) => {
     try {
-      console.log(imageSrc);
-      // send the image to the API
       var imageStr = imageSrc.replace(/^data:image\/(png|jpeg);base64,/, '');
 
       const json = fetch('http://0.0.0.0:8080/image_inference', {
@@ -35,11 +29,7 @@ function App() {
           return response.json();
         }
       }).then((json) => {
-        console.log(json);
-        var pred_class = json.pred_class;
-        console.log(pred_class);
-        var prob = json.prob;
-        console.log(prob);
+        setPrediction(json.pred_class);
         return json;
       });
     } catch (error) {
@@ -47,28 +37,28 @@ function App() {
     }
   };
 
-  // gets a screenshot from the webcam then sends it to the backend
   const capture = useCallback(() => {
-    // get image from webcam
     const imageSrc = webcamRef.current.getScreenshot();
-
-    // do preprocessing
     const processedFrame = doPreProcessing(imageSrc);
-
-    // TODO: send preprocessed frame to backend
     sendFrame(imageSrc);
   }, [webcamRef])
 
-    // start capture
   const startCapture = useCallback(() => {
+    if (captureIntervalRef.current) { // fix issue with restarting capture not working
+      clearInterval(captureIntervalRef.current);
+    }
     setIsCapturing(true);
     captureIntervalRef.current = setInterval(capture, captureInterval * 1000);
   }, [capture, captureInterval])
 
-  // stop capture
   const stopCapture = useCallback(() => {
-    clearInterval(captureIntervalRef.current);
+    if (captureIntervalRef.current) { // fix issue with restarting capture not working
+      clearInterval(captureIntervalRef.current);
+      captureIntervalRef.current = null;
+    }
+    setIsCapturing(false);
   }, []);
+
   useEffect(() => {
     return () => {
       if (captureIntervalRef.current) {
@@ -82,46 +72,54 @@ function App() {
   };
 
   return (
-    <>
-    <div className="App">
-        <h1>PORG - Processing Of Real-time Gestures</h1>
-        <h3>the most beautiful website u have ever seen</h3>
-        <div>
+    <div className="app-container">
+      <h1 className="app-title">PORG - Processing Of Real-time Gestures</h1>
+      
+      <div className="main-content">
+        <div className="webcam-container">
           <Webcam
             audio={false}
             ref={webcamRef}
             screenshotFormat="image/jpeg"
-            style={{ width: '512px', height: 'auto' }}
+            className="webcam"
           />
+          <button
+            onClick={isCapturing ? stopCapture : startCapture}
+            className={`capture-button ${isCapturing ? 'capturing' : ''}`}
+          >
+            {isCapturing ? 'Stop Capture' : 'Start Capture'}
+          </button>
         </div>
-        {/* DEBUG: this is to see a preview of the image after preprocessing.
-        This canvas needs to exist for the preprocessing to work, but it can be hidden once we no longer need it for debugging*/}
-        <div>
-          <canvas id="preProcessing_preview" width="256" height="auto"></canvas>
-        </div>
-        <div>
-          <label htmlFor="captureInterval">Capture Interval (seconds): </label>
-          <input
-            type="number"
-            id="captureInterval"
-            value={captureInterval}
-            onChange={handleIntervalChange}
-            min="0.1"
-            step="0.1"
-          />
-        </div>
-        <div>
-          {isCapturing ? (
-            <button onClick={stopCapture}>Stop Capture</button>
-          ) : (
-            <button onClick={startCapture}>Start Capture</button>
-          )}
-        </div>
-        <div>
-          <p>Frames processed: {processedFrames}</p>
+
+        <div className="prediction-container">
+          <h3>Translation</h3>
+          <div className="prediction-display">
+            {prediction || 'No translation yet'}
+          </div>
         </div>
       </div>
-    </>
+
+      <div className="diagnostic-section">
+        
+        <div className="preview-container">
+          <h3>Diagnostics</h3>
+          <canvas id="preProcessing_preview" width="256" height="auto"></canvas>
+        </div>
+        <div className="controls">
+          <div className="interval-control">
+            <label htmlFor="captureInterval">Capture Interval (seconds):</label>
+            <input
+              type="number"
+              id="captureInterval"
+              value={captureInterval}
+              onChange={handleIntervalChange}
+              min="0.1"
+              step="0.1"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
   )
 }
 
