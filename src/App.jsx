@@ -30,7 +30,7 @@ function App() {
           return response.json();
         }
       }).then((json) => {
-        setPrediction(json.pred_class);
+        setPrediction(json.pred_class == 0 ? 'A' : 'F');
         return json;
       });
     } catch (error) {
