@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from 'react'
+import React from 'react'
 import Webcam from 'react-webcam'
 import doPreProcessing from './preprocessing.js'
 import './App.css'
