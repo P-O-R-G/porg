@@ -15,8 +15,8 @@ function App() {
   const sendFrame = async (imageSrc) => {
     try {
       var imageStr = imageSrc.replace(/^data:image\/(png|jpeg);base64,/, '');
-
-      const json = fetch('http://0.0.0.0:8080/image_inference', {
+      
+       const json = fetch('http://localhost:8080/image_inference', {
         method: 'POST',
         headers: {
           'Content-Type': 'text/plain',
@@ -30,7 +30,7 @@ function App() {
           return response.json();
         }
       }).then((json) => {
-        setPrediction(json.pred_class == 0 ? 'A' : 'F');
+        setPrediction(json.pred_class);
         return json;
       });
     } catch (error) {
