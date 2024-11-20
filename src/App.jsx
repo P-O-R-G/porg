@@ -9,14 +9,16 @@ function App() {
   const [captureInterval, setCaptureInterval] = useState(1);
   const [processedFrames, setProcessedFrames] = useState(0);
   const [prediction, setPrediction] = useState('');
+  const [fullString, setFullString] = useState('');
+  const [confidence, setConfidence] = useState(0);
   const webcamRef = useRef(null);
   const captureIntervalRef = useRef(null);
 
   const sendFrame = async (imageSrc) => {
     try {
       var imageStr = imageSrc.replace(/^data:image\/(png|jpeg);base64,/, '');
-      
-       const json = fetch('http://localhost:8080/image_inference', {
+
+      const json = fetch('http://localhost:8080/image_inference', {
         method: 'POST',
         headers: {
           'Content-Type': 'text/plain',
@@ -31,6 +33,12 @@ function App() {
         }
       }).then((json) => {
         setPrediction(json.pred_class);
+        setConfidence(json.prob);
+        if (parseFloat(json.prob) > 0.85) {
+          setFullString(prevMessage => prevMessage + json.pred_class);
+        } else {
+          setFullString(prevMessage => prevMessage + '?');
+        }
         return json;
       });
     } catch (error) {
@@ -58,6 +66,10 @@ function App() {
       captureIntervalRef.current = null;
     }
     setIsCapturing(false);
+  }, []);
+
+  const resetMessage = useCallback(() => {
+    setFullString("");
   }, []);
 
   useEffect(() => {
@@ -96,6 +108,18 @@ function App() {
           <h3>Translation</h3>
           <div className="prediction-display">
             {prediction || 'No translation yet'}
+            {confidence == 0 ? "" : " (confidence " + confidence + ")"}
+          </div>
+          <div className="prediction-display">
+            {"Message: " + fullString}
+            <div>
+            <button
+                onClick={resetMessage}
+                className={`capturing`}
+              >
+                {'Reset Message'}
+              </button>
+            </div>
           </div>
         </div>
       </div>
