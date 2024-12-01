@@ -2,6 +2,7 @@ import { useState, useRef, useCallback, useEffect } from 'react'
 import React from 'react'
 import Webcam from 'react-webcam'
 import doPreProcessing from './preprocessing.js'
+import askChat from './chat.js'
 import './App.css'
 
 function App() {
@@ -10,15 +11,30 @@ function App() {
   const [processedFrames, setProcessedFrames] = useState(0);
   const [prediction, setPrediction] = useState('');
   const [fullString, setFullString] = useState('');
+  const [englishString, setEnglishString] = useState('');
   const [confidence, setConfidence] = useState(0);
+  const [chatGPTCounter, setChatGPTCounter] = useState(1);
   const webcamRef = useRef(null);
   const captureIntervalRef = useRef(null);
 
+  const incrementChatGPTCount = () => {
+    setChatGPTCounter(c => c + 1);
+  }
+
+  useEffect(() => {
+    // Ask ChatGPT for best guess of English translation every 5 seconds (as a function of capture interval)
+    if (chatGPTCounter >= (5 / captureInterval)) {
+      setChatGPTCounter(0);
+      askChatGPT();
+    }
+  }, [chatGPTCounter])
+
   const sendFrame = async (imageSrc) => {
+    // Send image to model for inference
     try {
       var imageStr = imageSrc.replace(/^data:image\/(png|jpeg);base64,/, '');
 
-      const json = fetch('http://localhost:8080/image_inference', {
+      const json = fetch('http://127.0.0.1:5000/image_inference', {
         method: 'POST',
         headers: {
           'Content-Type': 'text/plain',
@@ -40,16 +56,30 @@ function App() {
           setFullString(prevMessage => prevMessage + '?');
         }
         return json;
+      }).then(() => {
+        // Increment counter to check when we should ask ChatGPT for English translation
+        incrementChatGPTCount();
       });
     } catch (error) {
       console.error('Error sending frame to backend:', error);
     }
   };
 
+  const askChatGPT = async () => {
+    askChat(fullString).then((response) => {
+      var json = response.json();
+      console.log(json);
+      var responseText = json.choices[0].message.content;
+      console.log(responseText);
+      setEnglishString(responseText);
+    });    
+  }
+
   const capture = useCallback(() => {
     const imageSrc = webcamRef.current.getScreenshot();
     const processedFrame = doPreProcessing(imageSrc);
     sendFrame(imageSrc);
+
   }, [webcamRef])
 
   const startCapture = useCallback(() => {
@@ -120,6 +150,12 @@ function App() {
                 {'Reset Message'}
               </button>
             </div>
+          </div>
+          <div className="prediction-display">
+            {"English: " + englishString}
+          </div>
+          <div className="prediction-display">
+            {"ChatGPT Counter: " + chatGPTCounter}
           </div>
         </div>
       </div>
