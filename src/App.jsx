@@ -86,7 +86,12 @@ function App() {
 
   return (
     <div className="app-container">
-      <h1 className="app-title">PORG - Processing Of Real-time Gestures</h1>
+      <div className="app-header">
+        <button className="align-right">
+          <i className="bi bi-three-dots text-white" style={{ fontSize: '2rem'}}></i>
+        </button>
+        <h1 className="app-title">PORG - Processing Of Real-time Gestures</h1>
+      </div>
       
       <div className="main-content">
         <div className="webcam-container">
