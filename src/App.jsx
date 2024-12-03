@@ -34,7 +34,7 @@ function App() {
     try {
       var imageStr = imageSrc.replace(/^data:image\/(png|jpeg);base64,/, '');
 
-      const json = fetch('http://127.0.0.1:5000/image_inference', {
+      const json = fetch('http://127.0.0.1:8080/image_inference', {
         method: 'POST',
         headers: {
           'Content-Type': 'text/plain',
