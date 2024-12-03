@@ -15,7 +15,7 @@ const Header = () => {
                     </li>
                     <li>
                         <Link to="/about">
-                            <i class="bi-info-lg pad-icon" style={{color:"cornflowerblue"}}></i>
+                            <i class="bi-info-circle-fill pad-icon" style={{color:"cornflowerblue"}}></i>
                             About
                         </Link>
                     </li>
