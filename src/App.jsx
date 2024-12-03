@@ -1,8 +1,9 @@
 import { useState, useRef, useCallback, useEffect } from 'react'
-//import { Route, Routes, useNavigate } from "react-router-dom";
+import { Route, Routes} from "react-router-dom";
 import React from 'react'
 import Webcam from 'react-webcam'
 import Header from './components/Header.jsx';
+import About from './pages/About.jsx';
 import doPreProcessing from './preprocessing.js'
 import askChat from './chat.js'
 import './App.css'
@@ -18,7 +19,6 @@ function App() {
   const [chatGPTCounter, setChatGPTCounter] = useState(1);
   const webcamRef = useRef(null);
   const captureIntervalRef = useRef(null);
-  //const navigate = useNavigate();
 
   const incrementChatGPTCount = () => {
     setChatGPTCounter(c => c + 1);
@@ -119,69 +119,71 @@ function App() {
 
   return (
     <div className="app-container">
-      <Header />
-      
-      <div className="main-content">
-        <div className="webcam-container">
-          <Webcam
-            audio={false}
-            ref={webcamRef}
-            screenshotFormat="image/jpeg"
-            className="webcam"
-          />
-          <button
-            onClick={isCapturing ? stopCapture : startCapture}
-            className={`capture-button ${isCapturing ? 'capturing' : ''}`}
-          >
-            {isCapturing ? 'Stop Capture' : 'Start Capture'}
-          </button>
-        </div>
+      <div style={{ textAlign: "left" }}>
+        <Header />
+        <Routes>
+          <Route path="/" element={
+            <><div className="main-content">
+              <div className="webcam-container">
+                <Webcam
+                  audio={false}
+                  ref={webcamRef}
+                  screenshotFormat="image/jpeg"
+                  className="webcam" />
+                <button
+                  onClick={isCapturing ? stopCapture : startCapture}
+                  className={`capture-button ${isCapturing ? 'capturing' : ''}`}
+                >
+                  {isCapturing ? 'Stop Capture' : 'Start Capture'}
+                </button>
+              </div>
 
-        <div className="prediction-container">
-          <h3>Translation</h3>
-          <div className="prediction-display">
-            {prediction || 'No translation yet'}
-            {confidence == 0 ? "" : " (confidence " + confidence + ")"}
-          </div>
-          <div className="prediction-display">
-            {"Message: " + fullString}
-            <div>
-            <button
-                onClick={resetMessage}
-                className={`capturing`}
-              >
-                {'Reset Message'}
-              </button>
-            </div>
-          </div>
-          <div className="prediction-display">
-            {"English: " + englishString}
-          </div>
-          <div className="prediction-display">
-            {"ChatGPT Counter: " + chatGPTCounter}
-          </div>
-        </div>
-      </div>
-
-      <div className="diagnostic-section">
-        <div className="preview-container">
-          <h3>Diagnostics</h3>
-          <canvas id="preProcessing_preview" width="256" height="auto"></canvas>
-        </div>
-        <div className="controls">
-          <div className="interval-control">
-            <label htmlFor="captureInterval">Capture Interval (seconds):</label>
-            <input
-              type="number"
-              id="captureInterval"
-              value={captureInterval}
-              onChange={handleIntervalChange}
-              min="0.1"
-              step="0.1"
-            />
-          </div>
-        </div>
-      </div>
+              <div className="prediction-container">
+                <h3>Translation</h3>
+                <div className="prediction-display">
+                  {prediction || 'No translation yet'}
+                  {confidence == 0 ? "" : " (confidence " + confidence + ")"}
+                </div>
+                <div className="prediction-display">
+                  {"Message: " + fullString}
+                  <div>
+                    <button
+                      onClick={resetMessage}
+                      className={`capturing`}
+                    >
+                      {'Reset Message'}
+                    </button>
+                  </div>
+                </div>
+                <div className="prediction-display">
+                  {"English: " + englishString}
+                </div>
+                <div className="prediction-display">
+                  {"ChatGPT Counter: " + chatGPTCounter}
+                </div>
+              </div>
+            </div><div className="diagnostic-section">
+                <div className="preview-container">
+                  <h3>Diagnostics</h3>
+                  <canvas id="preProcessing_preview" width="256" height="auto"></canvas>
+                </div>
+                <div className="controls">
+                  <div className="interval-control">
+                    <label htmlFor="captureInterval">Capture Interval (seconds):</label>
+                    <input
+                      type="number"
+                      id="captureInterval"
+                      value={captureInterval}
+                      onChange={handleIntervalChange}
+                      min="0.1"
+                      step="0.1" />
+                  </div>
+                </div>
+              </div></>
+          }/>
+          <Route path="/about" element={<About />} />
+        </Routes>
+      </div>      
     </div>
   )
 }

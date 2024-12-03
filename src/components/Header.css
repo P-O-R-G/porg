@@ -1,0 +1,14 @@
+nav ul {
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: left;
+}
+
+nav ul li {
+    margin: 0 10px;
+}
+
+.pad-icon {
+    padding-right: 0.5rem;
+}
