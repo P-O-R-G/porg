@@ -1,6 +1,8 @@
 import { useState, useRef, useCallback, useEffect } from 'react'
+//import { Route, Routes, useNavigate } from "react-router-dom";
 import React from 'react'
 import Webcam from 'react-webcam'
+import Header from './components/Header.jsx';
 import doPreProcessing from './preprocessing.js'
 import askChat from './chat.js'
 import './App.css'
@@ -16,6 +18,7 @@ function App() {
   const [chatGPTCounter, setChatGPTCounter] = useState(1);
   const webcamRef = useRef(null);
   const captureIntervalRef = useRef(null);
+  //const navigate = useNavigate();
 
   const incrementChatGPTCount = () => {
     setChatGPTCounter(c => c + 1);
@@ -34,7 +37,7 @@ function App() {
     try {
       var imageStr = imageSrc.replace(/^data:image\/(png|jpeg);base64,/, '');
 
-      const json = fetch('http://127.0.0.1:5000/image_inference', {
+      const json = fetch('http://127.0.0.1:8080/image_inference', {
         method: 'POST',
         headers: {
           'Content-Type': 'text/plain',
@@ -66,19 +69,19 @@ function App() {
   };
 
   const askChatGPT = async () => {
-    askChat(fullString).then((response) => {
-      var json = response.json();
-      console.log(json);
-      var responseText = json.choices[0].message.content;
+    try {
+      const responseText = await askChat(fullString);
       console.log(responseText);
       setEnglishString(responseText);
-    });    
+    } catch(err) {
+      console.log("Error: ", err)
+    }    
   }
 
   const capture = useCallback(() => {
     const imageSrc = webcamRef.current.getScreenshot();
     const processedFrame = doPreProcessing(imageSrc);
-    sendFrame(imageSrc);
+    sendFrame(imageSrc); // is there a reason we send the source image and not hte preprocessed image?
 
   }, [webcamRef])
 
@@ -116,12 +119,7 @@ function App() {
 
   return (
     <div className="app-container">
-      <div className="app-header">
-        <button className="align-right">
-          <i className="bi bi-three-dots text-white" style={{ fontSize: '2rem'}}></i>
-        </button>
-        <h1 className="app-title">PORG - Processing Of Real-time Gestures</h1>
-      </div>
+      <Header />
       
       <div className="main-content">
         <div className="webcam-container">
@@ -166,7 +164,6 @@ function App() {
       </div>
 
       <div className="diagnostic-section">
-        
         <div className="preview-container">
           <h3>Diagnostics</h3>
           <canvas id="preProcessing_preview" width="256" height="auto"></canvas>

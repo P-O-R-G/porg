@@ -1,22 +1,28 @@
 import {redrawCanvas} from 'lena.js';
 import {grayscale} from 'lena.js';
 
-// prepares the image for the actual processing
-// right now, it just turns the image to grayscale to show that something is happening at all
-// additionally, this writes the image to the preview canvas (which needs to exist for this function to work)
+// does preprocessing for the diagnostic box to show off what the model is processing
 var  doPreProcessing = (function(imageSrc) {
     // get & load the canvas
     var previewCanvas = document.getElementById('preProcessing_preview');
+    // force canvas to be square
+    previewCanvas.width = previewCanvas.height;
     var previewContext = previewCanvas.getContext("2d");
     var previewIm = new Image();
 
     // wait for the image to be ready
     previewIm.onload = function() {
+        //console.log("im: " + previewIm.width + " " + previewIm.height);
+        // downscale the image
+        var targetRes = 224;
+        previewIm.height = previewIm.height / previewIm.width * targetRes;
+        previewIm.width = targetRes;
+        
+        // fill the background of the image with black
+        previewContext.fillRect(0, 0, previewCanvas.width, previewCanvas.width);
         // draw the original image to the canvas when ready
-        previewContext.drawImage(previewIm, 0, 0, previewCanvas.width, previewCanvas.height);
-
-        // apply the filter using Lena.js
-        redrawCanvas(previewCanvas, grayscale);
+        var imHei = previewIm.height / previewIm.width * previewCanvas.height;
+        previewContext.drawImage(previewIm, 0, (previewCanvas.height - imHei)/2, previewCanvas.width, imHei);
 
         // turn the image back to a JPEG & return the src
         var newSrc = previewCanvas.toDataURL("image/jpeg");
